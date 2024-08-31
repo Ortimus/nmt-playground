@@ -73,6 +73,56 @@ No fine-tuning mechanism is currently implemented.
 Performance may vary depending on the specific language pair and the domain of the text.
 
 
+
+## Streamlit Application
+
+This project includes a Streamlit web application that provides a user-friendly interface for the Neural Machine Translation model.
+
+### Features
+
+- Interactive web interface for translation
+- Support for multiple language pairs
+- Adjustable translation parameters (beam size, max length, number of translations)
+- Real-time translation results
+
+### Running the Streamlit App
+
+To run the Streamlit application, follow these steps:
+
+1. Ensure you have activated your virtual environment:
+2. Navigate to the project directory:
+```
+cd path/to/nmt-project
+```
+4. Run the Streamlit app:
+```
+streamlit run src/app.py
+```
+5. The app should now be running. Open your web browser and go to the URL displayed in your terminal (typically `http://localhost:8501`).
+
+### Using the App
+
+1. Select the source and target languages from the dropdown menus in the sidebar.
+2. Adjust the translation parameters if desired.
+3. Enter the text you want to translate in the input box.
+4. Click the "Translate" button to see the results.
+
+### Customization
+
+You can customize the app's appearance by modifying the `.streamlit/config.toml` file in the project root directory. This file allows you to change colors, fonts, and other visual elements of the Streamlit app.
+
+### Troubleshooting
+
+If you encounter any issues:
+- Ensure all required packages are installed (`pip install -r requirements.txt`)
+- Check that you're using the correct Python environment
+- Make sure you're running the app from the project root directory
+
+For more information on Streamlit, visit [Streamlit's documentation](https://docs.streamlit.io/).
+
+
+
+
 ## Acknowledgments
 
 This project uses models from the Hugging Face Transformers library.
