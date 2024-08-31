@@ -63,6 +63,22 @@ To run the test suite:
 python -m unittest discover tests
 ```
 
+## NMT Architecture
+
+```mermaid
+graph LR
+    A[Source Text] --> B[Tokenizer]
+    B --> C[Encoder]
+    C --> D[Attention]
+    D --> E[Decoder]
+    E --> F[Detokenizer]
+    F --> G[Target Text]
+    H[MarianMTModel] --> C
+    H --> D
+    H --> E
+    I[MarianTokenizer] --> B
+    I --> F
+    
 ## Note on Beam Search
 This project uses beam search for translation. Beam search is a heuristic search algorithm that explores a graph by expanding the most promising node in a limited set. It's used to balance the needs of better translation quality and efficient computation.
 
