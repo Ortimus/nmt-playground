@@ -60,6 +60,9 @@ class NMT(nn.Module):
             self.models[lang_pair] = MarianMTModel.from_pretrained(model_name)
             self.tokenizers[lang_pair] = MarianTokenizer.from_pretrained(model_name)
 
+
+
+
     def forward(self, source, target, source_lang, target_lang):
         """
         Perform a forward pass through the model for a specific language pair.
@@ -130,3 +133,7 @@ class NMT(nn.Module):
             return [outputs[i:i+num_return_sequences] for i in range(0, len(outputs), num_return_sequences)]
         else:
             return outputs
+        
+
+    def get_supported_language_pairs(self):
+        return list(self.MODEL_MAPPING.keys())
