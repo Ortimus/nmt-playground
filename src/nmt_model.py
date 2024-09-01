@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from transformers import MarianMTModel, MarianTokenizer
+from sacrebleu.metrics import BLEU
 
 class NMT(nn.Module):
     """
@@ -137,3 +138,18 @@ class NMT(nn.Module):
 
     def get_supported_language_pairs(self):
         return list(self.MODEL_MAPPING.keys())
+    
+
+    def compute_bleu_score(self, reference, hypothesis):
+        """
+        Compute the BLEU score for a translation.
+
+        Args:
+            reference (str): The reference (correct) translation
+            hypothesis (str): The model's translation
+
+        Returns:
+            float: The BLEU score
+        """
+        bleu = BLEU()
+        return bleu.corpus_score([hypothesis], [[reference]]).score

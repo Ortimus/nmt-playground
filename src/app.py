@@ -54,6 +54,10 @@ def main():
     st.header(f"Enter text to translate ({source_lang})")
     source_text = st.text_area("Source Text", height=150)
 
+    # Add a text area for reference translation
+    st.header(f"Enter reference translation (optional, for BLEU score) ({target_lang})")
+    reference_text = st.text_area("Reference Translation", height=150)
+
     if st.button("Translate"):
         if source_text:
             with st.spinner('Translating...'):
@@ -73,8 +77,16 @@ def main():
                     if num_return_sequences > 1:
                         for i, translation in enumerate(translations[0], 1):
                             st.write(f"Translation {i}: {translation}")
+
+                            # Compute BLEU Score if reference translation was provided
+                            if reference_text:
+                                bleu_score = model.compute_bleu_score(reference_text, translation)
+                                st.write(f"BLEU Score for Translation {i}: {bleu_score:.2f}")
                     else:
                         st.write(f"Translation: {translations[0]}")
+                        if reference_text:
+                            bleu_score = model.compute_bleu_score(reference_text, translations[0])
+                            st.write(f"BLEU Score: {bleu_score:.2f}")
 
                     if translations:
                         st.success("Translation completed successfully!")
