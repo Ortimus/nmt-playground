@@ -117,8 +117,15 @@ class TestNMT(unittest.TestCase):
             translations = self.model.translate(data['source'], source_lang, target_lang)
             self.assertEqual(len(translations), len(data['source']))
             for translation in translations:
-                self.assertIsInstance(translation, str)
-                self.assertGreater(len(translation), 0)
+                if isinstance(translation, list):
+                    # Multiple translations returned
+                    for t in translation:
+                        self.assertIsInstance(t, str)
+                        self.assertGreater(len(t), 0)
+                else:
+                    # Single translation returned
+                    self.assertIsInstance(translation, str)
+                    self.assertGreater(len(translation), 0)
 
     def test_beam_search(self):
         """
