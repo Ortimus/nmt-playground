@@ -5,7 +5,7 @@ This project implements a flexible Neural Machine Translation system using pre-t
 ## Features
 
 - Support for multiple language pairs
-- Utilizes pre-trained MarianMT models
+- Utilizes pre-trained MarianMT models (https://huggingface.co/docs/transformers/en/model_doc/marian)
 - Beam search for improved translation quality
 - Easy-to-use API for translation tasks
 - Comprehensive test suite
@@ -100,12 +100,27 @@ streamlit run src/app.py
 ```
 5. The app should now be running. Open your web browser and go to the URL displayed in your terminal (typically `http://localhost:8501`).
 
+
 ### Using the App
 
 1. Select the source and target languages from the dropdown menus in the sidebar.
-2. Adjust the translation parameters if desired.
-3. Enter the text you want to translate in the input box.
-4. Click the "Translate" button to see the results.
+
+2. Adjust the translation parameters if desired:
+   - Beam Size: Controls the breadth of the search during translation. Higher values may yield better results but increase computation time.
+   - Max Length: Sets the maximum length of the generated translation.
+   - Number of Translations: Determines how many translation variants to generate. This value will automatically adjust to be at most the Beam Size.
+
+3. Enter the text you want to translate in the "Source Text" input box.
+
+4. (Optional) Enter a reference translation in the "Reference Translation" input box. This allows the system to compute BLEU scores, which measure translation quality.
+
+5. Click the "Translate" button to see the results.
+
+6. The results will be displayed in a table format:
+   - If no reference translation was provided, you'll see the generated translations.
+   - If a reference translation was provided, you'll also see BLEU scores for each translation, indicating how close they are to the reference.
+
+Note: The "Number of Translations" will always be less than or equal to the "Beam Size". If you increase the Beam Size, you'll have the option to generate more translation variants.
 
 ### Customization
 
@@ -119,9 +134,6 @@ If you encounter any issues:
 - Make sure you're running the app from the project root directory
 
 For more information on Streamlit, visit [Streamlit's documentation](https://docs.streamlit.io/).
-
-
-
 
 ## Acknowledgments
 

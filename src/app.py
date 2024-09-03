@@ -1,5 +1,6 @@
 import streamlit as st
 import torch
+import pandas as pd
 from nmt_model import NMT
 
 @st.cache_resource
@@ -8,6 +9,7 @@ def load_model():
 
 def main():
 
+    st.set_page_config(layout="wide")  # Use wide layout for better space utilization
     st.title("Neural Machine Translation")
 
     # Load the model
@@ -45,14 +47,39 @@ def main():
                                    help="Maximum length of the generated translation.")
     
     num_return_sequences = st.sidebar.slider("Number of Translations", 
-                                             min_value=1, 
-                                             max_value=5,
-                                            value=1,
+                                            min_value=1, 
+                                            max_value=max(5, beam_size),  # Ensure max is not greater than beam_size
+                                            value=min(3, beam_size), # Ensure default is not greater than beam_size
                                             help="Number of translations to return. These correspond to the predictions with  the highest probablities.")
 
+    
+    # Add instructions to the sidebar
+    with st.sidebar.expander("How to Use"):
+        st.markdown("""
+        1. Select source and target languages from the dropdowns above.
+
+        2. Adjust translation parameters:
+           - Beam Size: Controls search breadth. Higher values may improve results but increase computation time.
+           - Max Length: Sets the maximum length of the generated translation.
+           - Number of Translations: Determines translation variants to generate. Will not exceed Beam Size.
+
+        3. Enter text to translate in the "Source Text" box in the main area.
+
+        4. (Optional) Enter a reference translation for BLEU score computation.
+
+        5. Click "Translate" to see results.
+
+        6. Results will show in a table:
+           - Without reference: Generated translations.
+           - With reference: Translations and BLEU scores.
+
+        Note: "Number of Translations" is always ≤ "Beam Size".
+        """)
+        
     # Input text
     st.header(f"Enter text to translate ({source_lang})")
     source_text = st.text_area("Source Text", height=150)
+    
 
     # Add a text area for reference translation
     st.header(f"Enter reference translation (optional, for BLEU score) ({target_lang})")
@@ -62,47 +89,52 @@ def main():
         if source_text:
             with st.spinner('Translating...'):
                 try:
-                    # Perform translation
                     translations = model.translate(
                         [source_text], 
-                        source_lang=source_lang, 
-                        target_lang=target_lang,
+                        source_lang, 
+                        target_lang, 
                         beam_size=beam_size,
                         max_length=max_length,
                         num_return_sequences=num_return_sequences
                     )
-
-                    # Display translations
-                    st.header(f"Translation Results ({target_lang})")
-                    if num_return_sequences > 1:
-                        for i, translation in enumerate(translations[0], 1):
-                            st.write(f"Translation {i}: {translation}")
-
-                            # Compute BLEU Score if reference translation was provided
-                            if reference_text:
-                                bleu_score = model.compute_bleu_score(reference_text, translation)
-                                st.write(f"BLEU Score for Translation {i}: {bleu_score:.2f}")
-                    else:
-                        st.write(f"Translation: {translations[0]}")
+                    
+                    # Ensure translations is a list
+                    if not isinstance(translations, list):
+                        translations = [translations]
+                    elif len(translations) == 1 and isinstance(translations[0], list):
+                        translations = translations[0]
+                    
+                    # Prepare data for the table
+                    table_data = []
+                    for i, translation in enumerate(translations, 1):
+                        row = {"Translation": translation}
                         if reference_text:
-                            bleu_score = model.compute_bleu_score(reference_text, translations[0])
-                            st.write(f"BLEU Score: {bleu_score:.2f}")
+                            bleu_score = model.compute_bleu_score(reference_text, translation)
+                            row["BLEU Score"] = f"{bleu_score:.2f}"
+                        table_data.append(row)
+                    
+                    # Create DataFrame
+                    df = pd.DataFrame(table_data)
+                    
+                    # Display results
+                    st.header(f"Translation Results ({target_lang})")
+                    st.table(df)
+                    
+                    st.success("Translation completed successfully!")
 
-                    if translations:
-                        st.success("Translation completed successfully!")
-
-                except ValueError as e:
-                    st.error(f"Error: {str(e)}")
+                except Exception as e:
+                    st.error(f"An error occurred during translation: {str(e)}")
         else:
             st.warning("Please enter some text to translate.")
+                    
 
-    # Display model information
-    with st.expander("Model Information"):
-        st.sidebar.header("Model Information")
-        st.sidebar.write(f"Device: {'cuda' if torch.cuda.is_available() else 'cpu'}")
-        st.sidebar.write("Supported Language Pairs:")
+
+    # Display Model Information 
+    with st.sidebar.expander("Model Information"):
+        st.write(f"Device: {'cuda' if torch.cuda.is_available() else 'cpu'}")
+        st.write("Supported Language Pairs:")
         for pair in supported_pairs:
-            st.sidebar.write(f"- {pair[0]} to {pair[1]}")
+            st.write(f"- {pair[0]} to {pair[1]}")
 
     st.markdown("---")
     st.markdown("Built using Streamlit and Hugging Face Transformers")

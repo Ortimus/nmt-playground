@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 from transformers import MarianMTModel, MarianTokenizer
 from sacrebleu.metrics import BLEU
@@ -94,7 +93,7 @@ class NMT(nn.Module):
         
         return outputs.loss
 
-    def translate(self, sentences, source_lang, target_lang, beam_size=5, max_length=100, num_return_sequences=1):
+    def translate(self, sentences, source_lang, target_lang, beam_size=5, max_length=100, num_return_sequences=3):
         """
         Translate sentences from source language to target language.
 
@@ -146,10 +145,12 @@ class NMT(nn.Module):
 
         Args:
             reference (str): The reference (correct) translation
-            hypothesis (str): The model's translation
+            hypothesis (str or list): The model's translation or list of translations
 
         Returns:
             float: The BLEU score
         """
         bleu = BLEU()
+        if isinstance(hypothesis, list):
+            hypothesis = hypothesis[0]  # Take the first translation if it's a list
         return bleu.corpus_score([hypothesis], [[reference]]).score
