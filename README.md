@@ -4,10 +4,11 @@ This project implements a flexible Neural Machine Translation system using pre-t
 
 ## Features
 
-- Support for multiple language pairs
-- Utilizes pre-trained MarianMT models (https://huggingface.co/docs/transformers/en/model_doc/marian)
+- Support for multiple translation models (MarianMT, M2M100, MBart50, NLLB)
+- Handles various language pairs depending on the chosen model
 - Beam search for improved translation quality
 - Easy-to-use API for translation tasks
+- Interactive Streamlit web application
 - Comprehensive test suite
 
 ## Installation
@@ -35,8 +36,11 @@ Here's a basic example of how to use the NMT model:
 ```python
 from src.nmt_model import NMT
 
-# Initialize the model
+# Initialize the model (default is MarianMT)
 nmt = NMT()
+
+# Or choose a specific model type
+# nmt = NMT('m2m100')
 
 # Translate a sentence from English to German
 source_sentence = "Hello, how are you?"
@@ -44,17 +48,14 @@ translated = nmt.translate([source_sentence], source_lang='en', target_lang='de'
 print(translated[0])
 ```
 
-## Supported Language Pairs
-Currently, the following language pairs are supported:
+## Supported Models and Language Pairs
+The project supports the following models:
 
-- English to German (en-de)
-- German to English (de-en)
-- English to French (en-fr)
-- French to English (fr-en)
-- English to Spanish (en-es)
-- Spanish to English (es-en)
+- MarianMT
+- M2M100
+- More to follow
 
-More language pairs can be added by updating the MODEL_MAPPING in the NMT class.
+Each model supports different language pairs. The available language pairs can be queried using the get_supported_language_pairs() method of the NMT class.
 
 ## Running Tests
 To run the test suite:
@@ -103,24 +104,14 @@ streamlit run src/app.py
 
 ### Using the App
 
-1. Select the source and target languages from the dropdown menus in the sidebar.
-
-2. Adjust the translation parameters if desired:
-   - Beam Size: Controls the breadth of the search during translation. Higher values may yield better results but increase computation time.
-   - Max Length: Sets the maximum length of the generated translation.
-   - Number of Translations: Determines how many translation variants to generate. This value will automatically adjust to be at most the Beam Size.
-
-3. Enter the text you want to translate in the "Source Text" input box.
-
-4. (Optional) Enter a reference translation in the "Reference Translation" input box. This allows the system to compute BLEU scores, which measure translation quality.
-
-5. Click the "Translate" button to see the results.
-
-6. The results will be displayed in a table format:
-   - If no reference translation was provided, you'll see the generated translations.
-   - If a reference translation was provided, you'll also see BLEU scores for each translation, indicating how close they are to the reference.
-
-Note: The "Number of Translations" will always be less than or equal to the "Beam Size". If you increase the Beam Size, you'll have the option to generate more translation variants.
+1. Select a translation model from the dropdown menu.
+2. Choose source and target languages from the dropdowns.
+Note: Available language pairs may vary depending on the selected model.
+3. Adjust translation parameters (Beam Size, Max Length, Number of Translations).
+4. Enter the text you want to translate in the "Source Text" box.
+5. (Optional) Enter a reference translation for BLEU score computation.
+6. Click "Translate" to generate the translation(s).
+7. View results in the displayed table.
 
 ### Customization
 
