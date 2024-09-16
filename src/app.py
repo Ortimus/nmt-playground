@@ -114,6 +114,31 @@ def main():
                                             value=1,
                                             help="Number of translations to return. These correspond to the predictions with the highest probabilities.")
 
+    
+    # Add instructions to the sidebar
+    with st.sidebar.expander("How to Use"):
+        st.markdown("""
+        1. Select a translation model from the dropdown menu.
+        2. Choose source and target languages from the dropdowns.
+        - Note: Available language pairs may vary depending on the selected model.
+        3. Adjust translation parameters:
+        - Beam Size: Controls search breadth. Higher values may improve results but increase computation time.
+        - Max Length: Sets the maximum length of the generated translation.
+        - Number of Translations: Determines how many translation variants to generate.
+        4. Enter the text you want to translate in the "Source Text" box in the main area.
+        5. (Optional) Enter a reference translation in the target language for BLEU score computation.
+        - Note: This will be cleared if you change the target language or select a model that doesn't support the current language pair.
+        6. Click "Translate" to generate the translation(s).
+        7. Results will be displayed in a table:
+        - Without reference: Only the generated translations will be shown.
+        - With reference: Both translations and their corresponding BLEU scores will be displayed.
+        
+        Additional Notes:
+        - If you change the model or target language, make sure the desired language pair is supported.
+        - The "Number of Translations" cannot exceed the "Beam Size".
+        - BLEU scores provide a measure of translation quality, with higher scores indicating better matches to the reference.
+        """)
+
     # Input text
     st.header(f"Enter text to translate ({source_lang_name})")
     source_text = st.text_area("Source Text", height=150)
