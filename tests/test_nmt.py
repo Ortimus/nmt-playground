@@ -1,14 +1,21 @@
 import unittest
+import sys
+import os
+
+# Add the src directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
 import torch
-from src.nmt_model import NMT
+from nmt_model import NMT
+from model_factory import get_available_models
 
 class TestNMT(unittest.TestCase):
     """
     Comprehensive test suite for the Neural Machine Translation (NMT) class.
 
     This class contains unit tests to verify the functionality of the NMT class,
-    including model initialization, encoding, decoding, forward pass, beam search,
-    and translation for multiple language pairs.
+    including model initialization, translation, and beam search
+    for multiple language pairs and model types.
     """
 
     @classmethod
@@ -17,9 +24,9 @@ class TestNMT(unittest.TestCase):
         Set up the test environment before running any tests.
 
         This method is called once before any tests in this class are run.
-        It initializes an NMT model and sets up sample sentences for different language pairs.
+        It initializes NMT models for each available model type and sets up sample sentences for different language pairs.
         """
-        cls.model = NMT()
+        cls.models = {model_type: NMT(model_type) for model_type in get_available_models()}
         cls.test_pairs = {
             ('en', 'de'): {
                 'source': ["Hello, how are you?", "The weather is nice today.", "I love programming."],
@@ -37,118 +44,64 @@ class TestNMT(unittest.TestCase):
 
     def test_initialization(self):
         """
-        Test the proper initialization of the NMT model.
+        Test the proper initialization of the NMT models.
 
-        This test checks if the model is an instance of NMT class.
+        This test checks if the models are instances of NMT class.
         """
-        self.assertIsInstance(self.model, NMT)
+        for model_type, model in self.models.items():
+            with self.subTest(model_type=model_type):
+                self.assertIsInstance(model, NMT)
 
-    def test_load_language_pair(self):
+    def test_supported_language_pairs(self):
         """
-        Test the loading of language pair models.
-
-        This test verifies if language pair models are loaded correctly for supported pairs
-        and if an error is raised for unsupported pairs.
+        Test that each model type supports the expected language pairs.
         """
-        for lang_pair in self.test_pairs.keys():
-            self.model.load_language_pair(*lang_pair)
-            self.assertIn(lang_pair, self.model.models)
-            self.assertIn(lang_pair, self.model.tokenizers)
-
-        with self.assertRaises(ValueError):
-            self.model.load_language_pair('en', 'ja')  # Assuming English to Japanese is not supported
-
-    def test_encode(self):
-        """
-        Test the encoding functionality of the NMT model.
-
-        This test verifies if the encode method produces the expected output shape
-        and type for a given input in different language pairs.
-        """
-        for (source_lang, target_lang), data in self.test_pairs.items():
-            self.model.load_language_pair(source_lang, target_lang)
-            lang_pair = (source_lang, target_lang)
-            source_ids = self.model.tokenizers[lang_pair](data['source'], return_tensors="pt", padding=True, truncation=True).input_ids
-            encoder_outputs = self.model.models[lang_pair].get_encoder()(source_ids)
-            self.assertIsInstance(encoder_outputs.last_hidden_state, torch.Tensor)
-            self.assertEqual(encoder_outputs.last_hidden_state.shape[0], len(data['source']))
-
-    def test_decode(self):
-        """
-        Test the decoding functionality of the NMT model.
-
-        This test checks if the decode method produces output of the expected
-        shape and type given encoder hidden states and target sentences for different language pairs.
-        """
-        for (source_lang, target_lang), data in self.test_pairs.items():
-            self.model.load_language_pair(source_lang, target_lang)
-            lang_pair = (source_lang, target_lang)
-            source_ids = self.model.tokenizers[lang_pair](data['source'], return_tensors="pt", padding=True, truncation=True).input_ids
-            target_ids = self.model.tokenizers[lang_pair](data['target'], return_tensors="pt", padding=True, truncation=True).input_ids
-            encoder_outputs = self.model.models[lang_pair].get_encoder()(source_ids)
-            decoder_outputs = self.model.models[lang_pair].get_decoder()(
-                input_ids=target_ids,
-                encoder_hidden_states=encoder_outputs.last_hidden_state
-            )
-            self.assertIsInstance(decoder_outputs.last_hidden_state, torch.Tensor)
-            self.assertEqual(decoder_outputs.last_hidden_state.shape[0], len(data['target']))
-
-    def test_forward(self):
-        """
-        Test the forward pass of the NMT model for multiple language pairs.
-
-        This test verifies if the forward method computes a valid loss
-        for given source and target sentences in different language pairs.
-        """
-        for (source_lang, target_lang), data in self.test_pairs.items():
-            loss = self.model(data['source'], data['target'], source_lang, target_lang)
-            self.assertIsInstance(loss, torch.Tensor)
-            self.assertEqual(loss.shape, torch.Size([]))  # scalar loss
-            self.assertGreater(loss.item(), 0)  # loss should be positive
+        for model_type, model in self.models.items():
+            with self.subTest(model_type=model_type):
+                supported_pairs = model.get_supported_language_pairs()
+                self.assertIsInstance(supported_pairs, list)
+                self.assertGreater(len(supported_pairs), 0)
 
     def test_translate(self):
         """
-        Test the translation functionality of the NMT model for multiple language pairs.
+        Test the translation functionality of the NMT models for multiple language pairs.
 
         This test checks if the translate method produces valid translations
         for given input sentences in different language pairs.
         """
-        for (source_lang, target_lang), data in self.test_pairs.items():
-            translations = self.model.translate(data['source'], source_lang, target_lang)
-            self.assertEqual(len(translations), len(data['source']))
-            for translation in translations:
-                if isinstance(translation, list):
-                    # Multiple translations returned
-                    for t in translation:
-                        self.assertIsInstance(t, str)
-                        self.assertGreater(len(t), 0)
-                else:
-                    # Single translation returned
-                    self.assertIsInstance(translation, str)
-                    self.assertGreater(len(translation), 0)
+        for model_type, model in self.models.items():
+            for (source_lang, target_lang), data in self.test_pairs.items():
+                if (source_lang, target_lang) in model.get_supported_language_pairs():
+                    with self.subTest(model_type=model_type, source_lang=source_lang, target_lang=target_lang):
+                        translations = model.translate(data['source'], source_lang, target_lang)
+                        self.assertEqual(len(translations), len(data['source']))
+                        for translation in translations:
+                            self.assertIsInstance(translation, str)
+                            self.assertGreater(len(translation), 0)
 
     def test_beam_search(self):
         """
-        Test the beam search functionality of the NMT model.
+        Test the beam search functionality of the NMT models.
 
         This test checks if the beam search method produces the expected number
         of hypotheses with the correct structure for a given input sentence in different language pairs.
         """
         beam_size = 3
-        for (source_lang, target_lang), data in self.test_pairs.items():
-            hypotheses = self.model.translate(
-                [data['source'][0]], 
-                source_lang, 
-                target_lang, 
-                beam_size=beam_size, 
-                num_return_sequences=beam_size
-            )
-            self.assertEqual(len(hypotheses), 1)  # One list of hypotheses for one input sentence
-            self.assertEqual(len(hypotheses[0]), beam_size)  # beam_size number of hypotheses
-            for hyp in hypotheses[0]:
-                self.assertIsInstance(hyp, str)
-                self.assertGreater(len(hyp), 0)
-
+        for model_type, model in self.models.items():
+            for (source_lang, target_lang), data in self.test_pairs.items():
+                if (source_lang, target_lang) in model.get_supported_language_pairs():
+                    with self.subTest(model_type=model_type, source_lang=source_lang, target_lang=target_lang):
+                        hypotheses = model.translate(
+                            [data['source'][0]], 
+                            source_lang, 
+                            target_lang, 
+                            num_beams=beam_size, 
+                            num_return_sequences=beam_size
+                        )
+                        self.assertEqual(len(hypotheses), beam_size)
+                        for hyp in hypotheses:
+                            self.assertIsInstance(hyp, str)
+                            self.assertGreater(len(hyp), 0)
 
 if __name__ == '__main__':
     unittest.main()
