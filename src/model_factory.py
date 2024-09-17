@@ -18,6 +18,7 @@ MODEL_CONFIGS = {
 }
 
 """ 
+# Commenting out mbart50 abd nlb_small since it was taking too long to lod in streamlit
     'mbart50': {
         'model_class': MBartForConditionalGeneration,
         'tokenizer_class': MBart50TokenizerFast,

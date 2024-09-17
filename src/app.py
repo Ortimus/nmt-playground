@@ -37,6 +37,12 @@ def main():
     if 'reference_text' not in st.session_state:
         st.session_state.reference_text = ""
 
+    # Initialize session state variables if they don't exist
+    if 'beam_size' not in st.session_state:
+        st.session_state.beam_size = 5
+    if 'num_return_sequences' not in st.session_state:
+        st.session_state.num_return_sequences = 5
+
     # Model selection
     available_models = get_available_models()
     model_type = st.sidebar.selectbox("Select Model", available_models, key="model_select")
@@ -97,24 +103,35 @@ def main():
     st.sidebar.header("Translation Parameters")
     beam_size = st.sidebar.slider("Beam Size", 
                                   min_value=1, 
-                                  max_value=10, 
-                                  value=5, 
+                                  max_value=5, 
+                                  value=3, 
                                   help="Number of beams for beam search. Higher values may give better results but increase computation time.")
     
     max_length = st.sidebar.slider("Max Length", 
                                    min_value=10, 
-                                   max_value=500, 
+                                   max_value=256, 
                                    value=100, 
                                    step=10,
                                    help="Maximum length of the generated translation.")
     
-    num_return_sequences = st.sidebar.slider("Number of Translations", 
-                                            min_value=1, 
-                                            max_value=5,
-                                            value=1,
-                                            help="Number of translations to return. These correspond to the predictions with the highest probabilities.")
-
     
+    # Adjust the number of translations based on beam size
+    if beam_size == 1:
+        num_return_sequences = 1
+        st.sidebar.info("With Beam Size 1, only one translation is possible.")
+    else:
+        # Ensure the previous num_return_sequences is not greater than the new beam_size
+        prev_num_sequences = min(st.session_state.num_return_sequences, beam_size)
+        num_return_sequences = st.sidebar.slider("Number of Translations", 
+                                                 min_value=1, 
+                                                 max_value=beam_size,
+                                                 value=prev_num_sequences,
+                                                 help="Number of translations to return. Cannot exceed Beam Size.")
+    
+    # Update the stored num_return_sequences
+    st.session_state.num_return_sequences = num_return_sequences
+
+
     # Add instructions to the sidebar
     with st.sidebar.expander("How to Use"):
         st.markdown("""

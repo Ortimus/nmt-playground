@@ -4,7 +4,8 @@ This project implements a flexible Neural Machine Translation system using pre-t
 
 ## Features
 
-- Support for multiple translation models (MarianMT, M2M100, MBart50, NLLB)
+- Support for multiple translation models (MarianMT, M2M100) more "light" models to be added in future versions.
+   - The loading times for large models are really not conducive to loading them in a streamlit app and I didn't want to include API calls for this exercise.
 - Handles various language pairs depending on the chosen model
 - Beam search for improved translation quality
 - Easy-to-use API for translation tasks
@@ -53,7 +54,7 @@ The project supports the following models:
 
 - MarianMT
 - M2M100
-- More to follow
+- More to follow if I can find smaller models that load fairly quickly or quantize some open source models to shrink them down.
 
 Each model supports different language pairs. The available language pairs can be queried using the get_supported_language_pairs() method of the NMT class.
 
