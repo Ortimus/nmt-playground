@@ -1,40 +1,70 @@
-# Neural Machine Translation (NMT) Project
+# NMT Playground: Streamlit app to play with Open-Source LLMs
 
-This project implements a flexible Neural Machine Translation system using pre-trained models from Hugging Face's Transformers library. It supports multiple language pairs and provides an easy-to-use interface for translation tasks.
+Hey there! Welcome to my Neural Machine Translation (NMT) playground. This project is all about having fun with Streamlit and open-source Large Language Models (LLMs) for translation tasks. 
 
-## Features
+## What's this all about?
 
-- Support for multiple translation models (MarianMT, M2M100) more "light" models to be added in future versions.
-   - The loading times for large models are really not conducive to loading them in a streamlit app and I didn't want to include API calls for this exercise.
-- Handles various language pairs depending on the chosen model
-- Beam search for improved translation quality
-- Easy-to-use API for translation tasks
-- Interactive Streamlit web application
-- Comprehensive test suite
+I created this project to experiment with:
+- Building interactive web apps using Streamlit
+- Playing around with various open-source LLMs for translation
+- Seeing how different models perform on translation tasks
 
-## Installation
+It's a sandbox for learning and exploration, not a production-ready tool. So expect some rough edges and have fun experimenting!
 
-1. Clone the repository:
+## Cool Features
+
+- Try out different open-source translation models 
+  - Currently only a couple of light models are supported to allow it to work in Streamlit
+- Interactive web interface powered by Streamlit
+- Adjust translation parameters and see how they affect results
+- Compare translations from different models side-by-side
+
+## Models I'm Playing With
+
+- MarianMT
+- M2M100
+- Future: 
+   - MBart50
+   - NLLB (the smaller, distilled version)
+
+Each model has its own quirks and strengths. Try them out and see which one you like best!
+
+## Taking it for a Spin
+
+1. Clone this repo:
 ```
   git clone https://github.com/Ortimus/nmt-project.git
   cd nmt-project
 ```
-
-2. Create a virtual environment:
+2. Set up a virtual environment (optional, but recommended):
 ```
 python -m venv nmt_env
-source nmt_env/bin/activate 
+source nmt_env/bin/activate  # On Windows use nmt_env\Scripts\activate
 ```
-3. Install the required packages:
+3. Install the goodies:
 ```
 pip install -r requirements.txt
 ```
+4. Fire up the Streamlit app:
+```
+streamlit run src/app.py
+```
+5. The app should now be running. Open your web browser typically at http://localhost:8501
 
-## Usage
+## Using the App
 
+- Select a translation model from the dropdown menu.
+- Choose source and target languages from the dropdowns. Note: Available language pairs may vary depending on the selected model.
+- Adjust translation parameters (Beam Size, Max Length, Number of Translations).
+- Enter the text you want to translate in the "Source Text" box.
+- (Optional) Enter a reference translation for BLEU score computation.
+- Click "Translate" to generate the translation(s).
+- View results in the displayed table.
+
+## Using the code 
 Here's a basic example of how to use the NMT model:
 
-```python
+```
 from src.nmt_model import NMT
 
 # Initialize the model (default is MarianMT)
@@ -49,84 +79,30 @@ translated = nmt.translate([source_sentence], source_lang='en', target_lang='de'
 print(translated[0])
 ```
 
-## Supported Models and Language Pairs
-The project supports the following models:
-
-- MarianMT
-- M2M100
-- More to follow if I can find smaller models that load fairly quickly or quantize some open source models to shrink them down.
-
-Each model supports different language pairs. The available language pairs can be queried using the get_supported_language_pairs() method of the NMT class.
-
 ## Running Tests
 To run the test suite:
-
 ```
 python -m unittest discover tests
 ```
 
-## Note on Beam Search
+### Note on Beam Search
 This project uses beam search for translation. Beam search is a heuristic search algorithm that explores a graph by expanding the most promising node in a limited set. It's used to balance the needs of better translation quality and efficient computation.
 
 ## Limitations
+- This is a playground, so don't expect perfect translations!
+- No fine-tuning implemented (yet) - maybe a fun future project?
+- Performance varies wildly depending on the model and language pair
+- Future idea: 
+   - Add more models
+   - Compare translations from multiple moedls on its oown tab
+   - Add cpability to call paid models through their APIs (not on Streamlit)
 
-Relies on pre-trained models, which may not perform well on domain-specific texts.
-No fine-tuning mechanism is currently implemented.
-Performance may vary depending on the specific language pair and the domain of the text.
+## License
 
-
-
-## Streamlit Application
-
-This project includes a Streamlit web application that provides a user-friendly interface for the Neural Machine Translation model.
-
-### Features
-
-- Interactive web interface for translation
-- Support for multiple language pairs
-- Adjustable translation parameters (beam size, max length, number of translations)
-- Real-time translation results
-
-### Running the Streamlit App
-
-To run the Streamlit application, follow these steps:
-
-1. Ensure you have activated your virtual environment:
-2. Navigate to the project directory:
-```
-cd path/to/nmt-project
-```
-4. Run the Streamlit app:
-```
-streamlit run src/app.py
-```
-5. The app should now be running. Open your web browser and go to the URL displayed in your terminal (typically `http://localhost:8501`).
-
-
-### Using the App
-
-1. Select a translation model from the dropdown menu.
-2. Choose source and target languages from the dropdowns.
-Note: Available language pairs may vary depending on the selected model.
-3. Adjust translation parameters (Beam Size, Max Length, Number of Translations).
-4. Enter the text you want to translate in the "Source Text" box.
-5. (Optional) Enter a reference translation for BLEU score computation.
-6. Click "Translate" to generate the translation(s).
-7. View results in the displayed table.
-
-### Customization
-
-You can customize the app's appearance by modifying the `.streamlit/config.toml` file in the project root directory. This file allows you to change colors, fonts, and other visual elements of the Streamlit app.
-
-### Troubleshooting
-
-If you encounter any issues:
-- Ensure all required packages are installed (`pip install -r requirements.txt`)
-- Check that you're using the correct Python environment
-- Make sure you're running the app from the project root directory
-
-For more information on Streamlit, visit [Streamlit's documentation](https://docs.streamlit.io/).
+This project is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 ## Acknowledgments
 
-This project uses models from the Hugging Face Transformers library.
+- For more information on Streamlit, visit [Streamlit's documentation](https://docs.streamlit.io/).
+- For Huggingfcae models , visit [Huggingface's documentation](https://huggingface.co/models?other=LLM).
+
