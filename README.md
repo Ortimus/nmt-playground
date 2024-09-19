@@ -33,8 +33,8 @@ Each model has its own quirks and strengths. Try them out and see which one you 
 
 1. Clone this repo:
 ```
-  git clone https://github.com/Ortimus/nmt-project.git
-  cd nmt-project
+  git clone https://github.com/Ortimus/nmt-playground.git
+  cd nmt-playground
 ```
 2. Set up a virtual environment (optional, but recommended):
 ```
